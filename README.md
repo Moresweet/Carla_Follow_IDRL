@@ -1,6 +1,6 @@
 # Carla Follow DIRL 程序说明
 
-![image-20240617101642518](/home/moresweet/Projects/Carla_Follow_DIRL/imgs/image-20240617101642518.png)
+![image-20240617101642518](./imgs/image-20240617101642518.png)
 
 ## 1. 环境
 ```shell
@@ -110,4 +110,4 @@ $$
 对于DDPG的训练部分，采用经典的DDPG模型，奖励由预训练的奖励网络给出，同时，在训练40代后会对奖励网络进行微调，目标是让DDPG产生的奖励期望与专家网络的奖励期望能够相似。
 对于DDPG的验证部分，会根据输入的模型，对一个跟车过程的MPC曲线对比拟合程度，采用曲线图的形式呈现。
 
-![image-20240617093638754](/home/moresweet/Projects/Carla_Follow_DIRL/imgs/image-20240617093638754.png)
+![image-20240617093638754](./imgs/image-20240617093638754.png)
