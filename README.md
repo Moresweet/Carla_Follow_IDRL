@@ -153,10 +153,10 @@ def gather_data(interval):
 
 图例如下所示：
 
-![image-20240814191928300](/home/moresweet/Desktop/code/Carla_Follow_IDRL/imgs/image-20240814191928300.png)
+![image-20240814191928300](./imgs/image-20240814191928300.png)
 
 结果图绘制参考`draw.py`
 
 将其中476行的`fvd_curve_df = pd.read_csv('./fvd_linear.csv')`中的路径字符串更改为自己的数据文件即可。图示如下：
 
-![总图](/home/moresweet/Desktop/code/Carla_Follow_IDRL/imgs/总图.png)
+![总图](./imgs/total.png)
