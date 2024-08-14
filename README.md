@@ -19,6 +19,8 @@ carla版本和API要求：0.9.13
 > 具体文件功能如下列举，具体运行细节参考第3节运行说明
 - `DDPG.py`：包含DDPG网络结构定义以及训练流程逻辑。
 - `Env.py`：包含Carla环境跟车模型的实现与加速度预警判定以及显示。
+- `Env_matplotlib_cal.py`：包括Carla环境跟车模型以及影子系统的实现和数据收集工作。（详见第5节）
+- `draw.py`：影子系统数据图绘制。
 - `IDRL_train.py`：包括RL智能体的训练逻辑以及奖励网络的微调，同时也包含模型的验证工作，目的是获得一个通过`当前速度`、`相对速度`、`相对车距`为输入，`加速度`为输出的策略网络。
 - `Pre_Reward.py`：包括逆向强化学习的专家经验奖励网络的训练过程，目的是获得一个以`当前速度`、`相对速度`、`相对车距`、`加速度`为输入，`奖励值`为输出的奖励网络。
 - `RSSModel.py`：RSS模型的实现，根据给定参数`反应时间`、`后车最大加速度`、`后车最大减速度`、`前车最大减速度`，计算`最小安全距离`。
@@ -111,3 +113,50 @@ $$
 对于DDPG的验证部分，会根据输入的模型，对一个跟车过程的MPC曲线对比拟合程度，采用曲线图的形式呈现。
 
 ![image-20240617093638754](./imgs/image-20240617093638754.png)
+
+## 5. 影子系统画图说明
+
+影子系统运行程序位于`Env_matplotlib_cal.py`中，其相较于Env增加了数据收集和中间结果的图片展示，为了保证结果的稳定性，70帧之后开始收集数据，中间结果每100个frame展示一次并保存数据文件`simulation_data.csv`。
+
+延迟数据收集帧数配置在`Env_matplotlib_cal.py`的480行，修改`70`这个数据
+
+```python
+            if self.frame_count > 70:
+                self.record_time_data()
+                self.shade_state(leader_vel_last, follow_vel_last, relative_vel, leader_pos_last, follow_pos_last,
+                                 dis_last, acc, idm_acceleration, fvd_acceleration, action, rss_mpc_acceleration)
+```
+
+保存和显示中间数据结果的帧数在991行的`gather_data`函数中，修改`100`
+
+```python
+def gather_data(interval):
+    def task():
+        while True:
+            # print("Frame count:{}".format(env.frame_count))
+            if env.frame_count % 100 == 0 and env.frame_count != 0:
+                draw_pic()
+            time.sleep(interval)
+
+    threading.Thread(target=task, daemon=True).start()
+```
+
+
+
+在类`Env`的初始化方法中，`self.mode`属性配置follow车辆的跟驰模型算法，可选'rss'、'idm'、'idrl'、'fvd'
+
+`self.scenario`属性配置工况，有两个工况，设置工况一则此属性配置为'spacial'、设置工况二则此属性配置为'none'
+
+工况一说明：直线跟驰（自车与前车初速度均为60km/h，保持3s匀速行驶后，前车开始以约2.22的平均加速度加速前进，在5s内将速度提升至100km/h。然后匀速行驶2s，前车在5s内减速至60km/h。
+
+工况二说明：弯道
+
+图例如下所示：
+
+![image-20240814191928300](/home/moresweet/Desktop/code/Carla_Follow_IDRL/imgs/image-20240814191928300.png)
+
+结果图绘制参考`draw.py`
+
+将其中476行的`fvd_curve_df = pd.read_csv('./fvd_linear.csv')`中的路径字符串更改为自己的数据文件即可。图示如下：
+
+![总图](/home/moresweet/Desktop/code/Carla_Follow_IDRL/imgs/总图.png)
